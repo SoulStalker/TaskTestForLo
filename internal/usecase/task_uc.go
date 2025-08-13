@@ -20,7 +20,7 @@ func NewTaskUC(repo domain.TaskRepo) *TaskUC {
 	return &TaskUC{repo: repo}
 }
 
-func (s *TaskUC) All(ctx context.Context) []domain.Task {
+func (s *TaskUC) All(ctx context.Context) ([]domain.Task, error) {
 	return s.repo.All(ctx)
 }
 
