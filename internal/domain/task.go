@@ -1,6 +1,9 @@
 package domain
 
-import "time"
+import (
+	"context"
+	"time"
+)
 
 const (
 	StatusTodo  = "todo"
@@ -17,16 +20,16 @@ type Task struct {
 }
 
 type TaskRepo interface {
-	All() []Task
-	GetById(id uint) (Task, error)
-	Create(task Task) (Task, error)
+	All(ctx context.Context) []Task
+	GetById(ctx context.Context, id uint) (Task, error)
+	Create(ctx context.Context, task Task) (Task, error)
 }
 
-// func (t *Task) Create(now time.Time, id uint) {
-// 	t.ID = id
-// 	t.CreatedAt = now
-// 	t.UpdatedAt = now
-// 	if t.Status == "" {
-// 		t.Status = StatusTodo
-// 	}
-// }
+func (t *Task) Create(now time.Time, id uint) {
+	t.ID = id
+	t.CreatedAt = now
+	t.UpdatedAt = now
+	if t.Status == "" {
+		t.Status = StatusTodo
+	}
+}
