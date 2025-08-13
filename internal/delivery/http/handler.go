@@ -6,15 +6,17 @@ import (
 
 	"github.com/gin-gonic/gin"
 	"github.com/soulstalker/task-api/internal/domain"
+	"github.com/soulstalker/task-api/internal/logger"
 	"github.com/soulstalker/task-api/internal/usecase"
 )
 
 type Handler struct {
-	UC *usecase.TaskUC
+	UC     *usecase.TaskUC
+	Logger *logger.AsyncLogger
 }
 
-func NewHandler(uc *usecase.TaskUC) *Handler {
-	return &Handler{UC: uc}
+func NewHandler(uc *usecase.TaskUC, lg *logger.AsyncLogger) *Handler {
+	return &Handler{UC: uc, Logger: lg}
 }
 
 // GET /tasks
@@ -26,7 +28,8 @@ func (h *Handler) All(c *gin.Context) {
 		return
 	}
 	c.JSON(http.StatusOK, tasks)
-	// todo add logger
+	h.Logger.Log("tasks_list", gin.H{"status": c.Query("status"), "count": len(tasks)})
+
 }
 
 // GET /tasks/:id
@@ -44,8 +47,11 @@ func (h *Handler) GetById(c *gin.Context) {
 		return
 	}
 	c.JSON(http.StatusOK, task)
+	h.Logger.Log("task_get", gin.H{"id": id})
+
 }
 
+// Create /tasks
 func (h *Handler) Create(c *gin.Context) {
 	ctx := c.Request.Context()
 	var task domain.Task
@@ -60,4 +66,6 @@ func (h *Handler) Create(c *gin.Context) {
 		return
 	}
 	c.JSON(http.StatusCreated, newTask)
+	h.Logger.Log("task_created", gin.H{"id": newTask.ID, "status": newTask.Status})
+
 }

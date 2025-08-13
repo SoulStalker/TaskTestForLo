@@ -4,11 +4,13 @@ import (
 	"context"
 	"log"
 	"net/http"
+	"os"
 	"os/signal"
 	"syscall"
 	"time"
 
 	httpDelivery "github.com/soulstalker/task-api/internal/delivery/http"
+	"github.com/soulstalker/task-api/internal/logger"
 	"github.com/soulstalker/task-api/internal/repo/memory"
 	"github.com/soulstalker/task-api/internal/usecase"
 )
@@ -23,9 +25,9 @@ func main() {
 	// init usecase
 	uc := usecase.NewTaskUC(repo)
 	// init logger
-
+	lg := logger.NewAsyncLogger(258, os.Stdout)
 	// init handler
-	h := httpDelivery.NewHandler(uc)
+	h := httpDelivery.NewHandler(uc, lg)
 	// init router
 	r := httpDelivery.SetupRouter(h)
 
