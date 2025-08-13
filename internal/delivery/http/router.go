@@ -4,6 +4,7 @@ import "github.com/gin-gonic/gin"
 
 // SetupRouter запускает роутер
 func SetupRouter(h *Handler) *gin.Engine {
+	gin.SetMode(gin.ReleaseMode)
 	r := gin.New()
 	r.Use(gin.Recovery())
 	r.Use(gin.Logger())

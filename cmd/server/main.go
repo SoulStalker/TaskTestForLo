@@ -30,19 +30,40 @@ func main() {
 	r := httpDelivery.SetupRouter(h)
 
 	srv := &http.Server{
-		Addr:    "localhost:8080",
+		Addr:    ":8080",
 		Handler: r,
 	}
 
-	<-ctx.Done() // Ждем сигнала на закрытие
-	log.Println("shutdown signal received")
+	// Канал для ошибок сервера
+	serverErr := make(chan error, 1)
 
+	// Запускаем сервер в отдельной горутине
+	go func() {
+		log.Println("starting server on :8080")
+		if err := srv.ListenAndServe(); err != nil && err != http.ErrServerClosed {
+			serverErr <- err
+		}
+	}()
+
+	log.Println("server started, waiting for requests...")
+
+	// Ждем либо сигнала завершения, либо ошибки сервера
+	select {
+	case <-ctx.Done():
+		log.Println("shutdown signal received")
+	case err := <-serverErr:
+		log.Printf("server error: %v", err)
+		return
+	}
+
+	// Graceful shutdown
+	log.Println("shutting down server...")
 	shCtx, cancel := context.WithTimeout(context.Background(), 5*time.Second)
 	defer cancel()
 
 	if err := srv.Shutdown(shCtx); err != nil {
 		log.Printf("server shutdown error: %v", err)
+	} else {
+		log.Println("server shutdown complete")
 	}
-
-	log.Println("shutdown complete")
 }

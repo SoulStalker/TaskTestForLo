@@ -33,6 +33,7 @@ func (r *TaskRepoIM) Create(ctx context.Context, t domain.Task) (domain.Task, er
 	id := r.nextID - 1
 	now := time.Now().UTC()
 	t.Create(now, id)
+	r.nextID++
 	r.data[id] = t
 	return t, nil
 }
