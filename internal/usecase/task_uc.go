@@ -20,8 +20,8 @@ func NewTaskUC(repo domain.TaskRepo) *TaskUC {
 	return &TaskUC{repo: repo}
 }
 
-func (s *TaskUC) All(ctx context.Context) ([]domain.Task, error) {
-	return s.repo.All(ctx)
+func (s *TaskUC) All(ctx context.Context, status *domain.Status) ([]domain.Task, error) {
+	return s.repo.All(ctx, status)
 }
 
 func (s *TaskUC) GetById(ctx context.Context, id uint) (domain.Task, error) {

@@ -54,7 +54,7 @@ func (r *TaskRepoIM) GetById(ctx context.Context, id uint) (domain.Task, error) 
 	return t, nil
 }
 
-func (r *TaskRepoIM) All(ctx context.Context) ([]domain.Task, error) {
+func (r *TaskRepoIM) All(ctx context.Context, status *domain.Status) ([]domain.Task, error) {
 	select {
 	case <-ctx.Done():
 		return nil, ctx.Err()
@@ -65,7 +65,9 @@ func (r *TaskRepoIM) All(ctx context.Context) ([]domain.Task, error) {
 
 	tasks := make([]domain.Task, 0, len(r.data))
 	for _, task := range r.data {
-		tasks = append(tasks, task)
+		if status == nil || task.Status == *status {
+			tasks = append(tasks, task)
+		}
 	}
 	return tasks, nil
 }

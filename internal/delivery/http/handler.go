@@ -22,7 +22,17 @@ func NewHandler(uc *usecase.TaskUC, lg *logger.AsyncLogger) *Handler {
 // GET /tasks
 func (h *Handler) All(c *gin.Context) {
 	ctx := c.Request.Context()
-	tasks, err := h.UC.All(ctx)
+	statusParam := c.Query("status")
+	var status *domain.Status
+	if statusParam != "" {
+		if s, err := domain.ParseStatus(statusParam); err == nil {
+			status = &s
+		} else {
+			c.JSON(http.StatusBadRequest, gin.H{"error": "invalid status"})
+			return
+		}
+	}
+	tasks, err := h.UC.All(ctx, status)
 	if err != nil {
 		c.JSON(http.StatusInternalServerError, gin.H{"error": err.Error()})
 		return
