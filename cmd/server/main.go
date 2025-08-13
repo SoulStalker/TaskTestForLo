@@ -1,13 +1,18 @@
 package main
 
 import (
+	"context"
 	"log"
-
-	"github.com/gin-gonic/gin"
+	"net/http"
+	"os/signal"
+	"syscall"
+	"time"
 )
 
 func main() {
 	// add context for os signal
+	ctx, stop := signal.NotifyContext(context.Background(), syscall.SIGINT, syscall.SIGTERM)
+	defer stop()
 
 	// init repo
 
@@ -19,11 +24,19 @@ func main() {
 
 	// init router
 
-	r := gin.Default()
-	r.Use(gin.Recovery())
-
-	err := r.Run()
-	if err != nil {
-		log.Fatal(err)
+	srv := &http.Server{
+		Addr: ":8080",
 	}
+
+	<-ctx.Done() // Ждем сигнала на закрытие
+	log.Println("shutdown signal received")
+
+	shCtx, cancel := context.WithTimeout(context.Background(), 5*time.Second)
+	defer cancel()
+
+	if err := srv.Shutdown(shCtx); err != nil {
+		log.Printf("server shutdown error: %v", err)
+	}
+
+	log.Println("shutdown complete")
 }
